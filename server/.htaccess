@@ -1,0 +1,2 @@
+RewriteEngine On
+RewriteRule ^api/([^/]+)/$ /api/$1.api.php [L,QSA]

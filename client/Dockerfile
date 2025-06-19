@@ -12,7 +12,7 @@ RUN npm install
 COPY . .
 
 # Build the Svelte application
-RUN #npm run build
+# RUN npm run build
 
 # Expose the port the app will run on
 EXPOSE 5000

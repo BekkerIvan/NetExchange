@@ -1,20 +1,22 @@
 services:
-#    server:
-#        image: php:8-apache
-#        ports:
-#            - 80:80
-#        volumes:
-#            - ./server/:/var/www/html/
-#        env_file:
-#            - server/.env
+    server:
+        image: php:8-apache
+        ports:
+            - 5002:80
+        volumes:
+            - ./server/:/var/www/html/
+            - ./server/php.ini:/usr/local/etc/php/conf.d/php.ini
+        env_file:
+            - server/.env
+        command: /bin/bash -c "a2enmod rewrite && apache2-foreground"
     client:
         build:
             context: ./client
             dockerfile: Dockerfile
         ports:
-            - "5000:5000"
+            - "5001:5000"
         env_file:
-            -   /client/.env
+            -   client/.env
         volumes:
             - ./client:/app
             - /app/node_modules
