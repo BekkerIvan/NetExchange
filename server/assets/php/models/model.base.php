@@ -40,8 +40,7 @@ abstract class Model {
         return self::$DataModelArr;
     }
 
-    public static function createDataModelSql(): string {
-        $CreateTableSQLArr = [];
+    public static function createDataModel(Database $DatabaseObj): void {
         foreach (self::$DataModelArr as $TableNameStr => $TableDefinitionArr) {
             $ColumnDefinitionArr = [];
             foreach ($TableDefinitionArr["Columns"] as $ColumnNameStr => $DataTypeStr) {
@@ -60,10 +59,9 @@ abstract class Model {
             }
 
             $ColumnDefinitionStr = implode(",", $ColumnDefinitionArr);
-            $CreateTableSQLArr[$TableNameStr] =  <<<SQL
-                CREATE TABLE `{$TableNameStr}` ({$ColumnDefinitionStr})
-            SQL;
+            $DatabaseObj->query(<<<SQL
+                CREATE TABLE IF NOT EXISTS `{$TableNameStr}` ({$ColumnDefinitionStr})
+            SQL);
         }
-        return implode(";", $CreateTableSQLArr);
     }
 }

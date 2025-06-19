@@ -59,6 +59,27 @@ class API {
     }
 
     public function run(): never {
-        $this->return($this->PathInfoArr[0]());
+        $this->return($this->PathInfoArr[0]($this));
+    }
+
+    public function call(string $UrlStr, array $PostDataArr = [], int $TimeOutSecondsInt = 120): bool|string {
+        $CurlObj = curl_init();
+        curl_setopt_array($CurlObj, [
+            CURLOPT_RETURNTRANSFER  => true,
+            CURLOPT_HEADER          => false,
+            CURLOPT_FOLLOWLOCATION  => true,
+            CURLOPT_MAXREDIRS       => 10,
+            CURLOPT_AUTOREFERER     => true,
+            CURLOPT_CONNECTTIMEOUT  => $TimeOutSecondsInt,
+            CURLOPT_TIMEOUT         => $TimeOutSecondsInt,
+            CURLOPT_POSTFIELDS      => http_build_query($PostDataArr),
+            CURLOPT_POST			=> true,
+            CURLOPT_HTTPAUTH		=> CURLAUTH_BASIC,
+            CURLOPT_URL				=> $UrlStr,
+            CURLOPT_SSL_VERIFYPEER  => false
+        ]);
+        $ResponseStr = curl_exec($CurlObj);
+        curl_close($CurlObj);
+        return $ResponseStr;
     }
 }

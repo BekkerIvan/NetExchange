@@ -8,7 +8,7 @@ services:
             - ./server/php.ini:/usr/local/etc/php/conf.d/php.ini
         env_file:
             - server/.env
-        command: /bin/bash -c "a2enmod rewrite && apache2-foreground"
+        command: /bin/bash -c "docker-php-ext-install mysqli && a2enmod rewrite && apache2-foreground"
     client:
         build:
             context: ./client
