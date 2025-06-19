@@ -8,13 +8,34 @@ class API {
     const string PATCH = "PATCH";
     const string NONE = "NONE";
 
+    protected array $PathInfoArr = [];
     public function __construct(
         protected array $AllowedMethodsArr
     ) {
-//        if (!$this->isValidHttpRequest()) {
-//            $this->setHttpStatusCode();
-//            $this->return("Invalid Request: `{$this->getHttpMethod()}`");
-//        }
+        $PathInfoStr = $_SERVER["PATH_INFO"] ?? DIRECTORY_SEPARATOR;
+        if (str_starts_with($PathInfoStr, DIRECTORY_SEPARATOR)) {
+            $PathInfoStr = substr($PathInfoStr, 1);
+        }
+        if (str_ends_with($PathInfoStr, DIRECTORY_SEPARATOR)) {
+            $PathInfoStr = substr($PathInfoStr, 0, -1);
+        }
+        $this->PathInfoArr = explode(DIRECTORY_SEPARATOR, $PathInfoStr);
+    }
+
+    public function validate(): bool {
+        if (empty($this->PathInfoArr[0])) {
+            return false;
+        }
+        if (empty($this->AllowedMethodsArr[$this->PathInfoArr[0]])) {
+            return false;
+        }
+        if ($this->AllowedMethodsArr[$this->PathInfoArr[0]] !== $this->getHttpMethod()) {
+            return false;
+        }
+        if (!function_exists($this->PathInfoArr[0])) {
+            $this->return("Invalid function");
+        }
+        return true;
     }
 
     protected function isValidHttpRequest(): bool {
@@ -35,5 +56,9 @@ class API {
         };
         echo json_encode($DataMix);
         die();
+    }
+
+    public function run(): never {
+        $this->return($this->PathInfoArr[0]());
     }
 }

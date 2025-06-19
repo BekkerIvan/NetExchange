@@ -20,20 +20,20 @@ services:
         volumes:
             - ./client:/app
             - /app/node_modules
-#    mysql:
-#        image: mysql:8.0
-#        environment:
-#            MYSQL_ROOT_PASSWORD: "secret"
-#            MYSQL_USER: "user"
-#            MYSQL_PASSWORD: "secret"
-#            MYSQL_DATABASE: "exchange"
-#        volumes:
-#            - mysql8data:/var/lib/mysql
-#        command:
-#            - --default-authentication-plugin=caching_sha2_password
-#            - --lower_case_table_names=1
-#            - --sql_mode=
-#        ports:
-#            - 3306:3306
+    mysql:
+        image: mysql:8.0
+        environment:
+            MYSQL_ROOT_PASSWORD: "secret"
+            MYSQL_USER: "user"
+            MYSQL_PASSWORD: "secret"
+            MYSQL_DATABASE: "exchange"
+        volumes:
+            - mysql8data:/var/lib/mysql
+        command:
+            - --default-authentication-plugin=caching_sha2_password
+            - --lower_case_table_names=1
+            - --sql_mode=
+        ports:
+            - 3306:3306
 volumes:
     mysql8data:

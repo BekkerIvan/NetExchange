@@ -1,2 +1,6 @@
+Options +FollowSymlinks
+
 RewriteEngine On
-RewriteRule ^api/([^/]+)/$ /api/$1.api.php [L,QSA]
+RewriteCond %{REQUEST_URI} !(/$|\.)
+RewriteRule (.*) %{REQUEST_URI}/ [R=301,L]
+RewriteRule ^api/([a-z]+)/(.*) api/$1.api.php/$2 [NC]
