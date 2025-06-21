@@ -33,33 +33,49 @@ class API {
             return false;
         }
         if (!function_exists($this->PathInfoArr[0])) {
-            $this->return("Invalid function");
+            $this->return("Invalid function", 400);
         }
         return true;
+    }
+
+    public function getPathInfoIndex(int $Index) {
+        return $this->PathInfoArr[$Index] ?? null;
     }
 
     protected function isValidHttpRequest(): bool {
         return in_array($this->getHttpMethod(), $this->AllowedMethodsArr);
     }
 
-    public function setHttpStatusCode(int $StatusCodeInt = 400): bool {
+    public function setHttpStatusCode(int $StatusCodeInt): bool {
         return http_response_code($StatusCodeInt);
     }
     public function getHttpMethod(): string {
         return $_SERVER["REQUEST_METHOD"] ?? self::NONE;
     }
-    public function return(mixed $DataMix): never {
+    public function return(mixed $DataMix, int $StatusCodeInt = 400): never {
         header("Content-Type: application/json; charset=utf-8");
-        $DataMix = match (gettype($DataMix)) {
-            "string", "integer", "double" => ["data" => $DataMix],
-            default => $DataMix
-        };
-        echo json_encode($DataMix);
+        $this->setHttpStatusCode($StatusCodeInt);
+//        $DataMix = match (gettype($DataMix)) {
+//            "string", "integer", "double", "NULL", "boolean" => ["data" => $DataMix],
+//            default => $DataMix
+//        };
+        echo json_encode([
+            "data" => $DataMix
+        ]);
         die();
     }
 
     public function run(): never {
-        $this->return($this->PathInfoArr[0]($this));
+        try {
+            $this->return($this->PathInfoArr[0]($this), 200);
+        } catch (Throwable $ExceptionObj) {
+            $this->return([
+                "message" => $ExceptionObj->getMessage(),
+                "file" => $ExceptionObj->getFile(),
+                "line" => $ExceptionObj->getLine(),
+                "trace" => $ExceptionObj->getTrace(),
+            ], 200);
+        }
     }
 
     public function call(string $UrlStr, array $PostDataArr = [], int $TimeOutSecondsInt = 120): bool|string {

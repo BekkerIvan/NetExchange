@@ -1,5 +1,5 @@
 <?php
-abstract class Model {
+abstract class Model implements JsonSerializable {
     // DATA TYPES
 
     // STRING
@@ -35,6 +35,13 @@ abstract class Model {
     public abstract function setTableColumns(): void;
     public abstract function setTableConstraints(): void;
     public abstract function setTableDefaults(): void;
+    public abstract function jsonSerialize(): array;
+    protected abstract function construct(stdClass $StdClassObj): self;
+
+    protected int $IdInt;
+    public abstract function load(Database $DatabaseObj, int $Id): ?self;
+    public abstract function loadAll(Database $DatabaseObj): array;
+    public abstract function Save(Database $DatabaseObj): self;
 
     public static function getDataModel(): array {
         return self::$DataModelArr;
