@@ -9,7 +9,7 @@
     export let currencies: Array<Currency> = [];
     onMount(async () => {
         loading = true;
-        const response = await fetch("http://localhost:5002/api/currency/loadAll/");
+        const response = await fetch("http://localhost:8080/api/currency/loadAll/");
         loading = false;
         if (!response.ok) {
             currencies = [];

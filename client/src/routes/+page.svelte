@@ -43,7 +43,7 @@
         formData.set("id", String(selectedCurrency?.Id ?? -1));
         formData.set("value", String(value));
         formData.set("direction", String(baseCurrency));
-        const response = await fetch("http://localhost:5002/api/order/place/", {
+        const response = await fetch("http://localhost:8080/api/order/place/", {
             method: "POST",
             body: formData
         });
@@ -69,7 +69,7 @@
         formData.set("id", String(selectedCurrency?.Id ?? -1));
         formData.set("value", String(value));
         formData.set("direction", String(baseCurrency));
-        const response = await fetch("http://localhost:5002/api/currency/convert/", {
+        const response = await fetch("http://localhost:8080/api/currency/convert/", {
             method: "POST",
             body: formData
         });
