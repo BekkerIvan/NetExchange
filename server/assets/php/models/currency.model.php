@@ -130,7 +130,8 @@ class Currency extends Model {
         }
         fwrite($CurrencyFileObj, <<<PHP
 <?php
-class {$this->CodeStr} {
+require_once "currency.base.php";
+class {$this->CodeStr} extends CurrencyBase {
     const string CODE = '{$this->CodeStr}';
 }
 PHP);
