@@ -18,9 +18,9 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install mysqli \
     && a2enmod rewrite
 
-COPY --from=composer /app/vendor /var/www/html/vendor
-
 WORKDIR /var/www/html
+
+COPY --from=composer /app/vendor /var/www/html/assets/php/vendor
 
 COPY . .
 COPY php.ini /usr/local/etc/php/conf.d/php.ini
