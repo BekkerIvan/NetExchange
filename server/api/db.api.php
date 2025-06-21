@@ -56,7 +56,8 @@ function currency(API $APIObj): string {
     }
 
     $DatabaseObj = new Database();
-    require_once "../assets/php/database.class.php";
+    $CurrencyObj = new Currency();
+    $CurrencyObj->truncate($DatabaseObj);
     foreach ($ResponseObj->quotes as $CurrencyStr => $ConversionRateFlt) {
         $CurrencyObj = new Currency();
         $CurrencyObj->Code = str_replace($ResponseObj->source, "", $CurrencyStr);
