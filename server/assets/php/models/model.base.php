@@ -40,7 +40,7 @@ abstract class Model implements JsonSerializable {
 
     protected int $IdInt;
     public abstract function Save(Database $DatabaseObj): self;
-    public function load(Database $DatabaseObj, int $Id): ?self {
+    public function load(Database $DatabaseObj, int $Id): ?static {
         $EntityStdObj = $DatabaseObj->query(<<<SQL
             SELECT *
             FROM `{$this->getTableName()}`
@@ -62,6 +62,11 @@ abstract class Model implements JsonSerializable {
             $EntityObjArr[] = $EntityObj->construct($EntityStdObj);
         }
         return $EntityObjArr;
+    }
+    public function truncate(Database $DatabaseObj): array {
+        return $DatabaseObj->query(<<<SQL
+            TRUNCATE `{$this->getTableName()}`
+        SQL);
     }
 
     public static function getDataModel(): array {

@@ -44,6 +44,10 @@ class API {
         return $this->PathInfoArr[$Index] ?? null;
     }
 
+    public function getParameter(string $KeyStr) {
+        return $_REQUEST[$KeyStr] ?? null;
+    }
+
     protected function isValidHttpRequest(): bool {
         return in_array($this->getHttpMethod(), $this->AllowedMethodsArr);
     }
