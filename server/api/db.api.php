@@ -46,7 +46,7 @@ function sync(): string {
 
 function currency(API $APIObj): string {
     $ApiKeyStr = getenv("CURRENCY_API_KEY");
-    $BaseCurrencyStr = getenv("BASE_CURRENCY");
+    $BaseCurrencyStr = BASE_CURRENCY;
 
     $ResponseStr = $APIObj->call("https://apilayer.net/api/live?access_key={$ApiKeyStr}&source={$BaseCurrencyStr}");
     $ResponseObj = json_decode($ResponseStr);

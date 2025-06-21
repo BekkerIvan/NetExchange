@@ -1,21 +1,21 @@
 <script lang="ts">
-    import { Input, Label} from "flowbite-svelte";
+    import { Input, Label, Button, Tooltip} from "flowbite-svelte";
+    import {RefreshOutline} from "flowbite-svelte-icons";
+
     import type Currency from "$lib/intefaces/currency.ts";
     export let currency: null|Currency = null;
-
-    export let currencyValue: number;
-    export let zarValue: number;
+    export let baseCurrency: Boolean = true;
+    export let value: number = 0;
 </script>
 {#if currency}
 <section class="flex flex-col gap-3">
     <div>
-        <Label>ZAR</Label>
-        <Input onchange={() => currencyValue = 0} bind:value={zarValue} type="number" min="0"></Input>
-    </div>
-    <span class="text-gray-500 w-full text-center">- OR -</span>
-    <div>
-        <Label>{currency.Code}</Label>
-        <Input onchange={() => zarValue = 0} bind:value={currencyValue} type="number" min="0"></Input>
+        <Label class="flex justify-between items-center">
+            <span>{baseCurrency ? "ZAR" : currency.Code}</span>
+            <Button title="Switch between ZAR and {currency?.Code}" color="light" size="xs" onclick={() => baseCurrency = !baseCurrency}><RefreshOutline/></Button>
+            <Tooltip placement="top">Switch between ZAR and {currency?.Code}</Tooltip>
+        </Label>
+        <Input bind:value type="number" min="0"></Input>
     </div>
 </section>
 {/if}

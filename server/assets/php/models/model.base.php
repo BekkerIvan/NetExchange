@@ -69,6 +69,12 @@ abstract class Model implements JsonSerializable {
         SQL);
     }
 
+    public function Delete(Database $DatabaseObj): void {
+        $DatabaseObj->query(<<<SQL
+            DELETE FROM `{$this->getTableName()}` WHERE Id = {$this->IdInt}
+        SQL);
+    }
+
     public static function getDataModel(): array {
         return self::$DataModelArr;
     }

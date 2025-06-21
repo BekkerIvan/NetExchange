@@ -37,18 +37,34 @@ function convert(API $APIObj): array {
         $APIObj->return("Invalid request");
     }
     require_once $CurrencyObj->CurrencyClassPath;
-    $ConvertFromFlt = $APIObj->getParameter("from");
-    $ConvertToFlt = $APIObj->getParameter("to");
+    $DirectionBool = filter_var($APIObj->getParameter("direction"), FILTER_VALIDATE_BOOLEAN);
+    $ValueFlt = $APIObj->getParameter("value");
 
     /** @var CurrencyBase $CurrencyModelClassStr */
     $CurrencyModelClassStr = $CurrencyObj->Code;
-    if (!empty($ConvertFromFlt)) {
-        $ConvertToFlt = $CurrencyModelClassStr::convertFrom($ConvertFromFlt, $CurrencyObj->ExchangeRate);
-    } else if (!empty($ConvertToFlt)) {
-        $ConvertFromFlt = $CurrencyModelClassStr::convertTo($ConvertToFlt, $CurrencyObj->ExchangeRate);
+    if ($DirectionBool) {
+        $ConvertedValueFlt = $CurrencyModelClassStr::convertFrom($ValueFlt, $CurrencyObj->ExchangeRate);
+    } else {
+        $ConvertedValueFlt = $CurrencyModelClassStr::convertTo($ValueFlt, $CurrencyObj->ExchangeRate);
     }
-    return [
-        "from" => (float) $ConvertFromFlt,
-        "to" => (float) $ConvertToFlt
+
+    $ReturnArr = [
+        "From" => $DirectionBool ? BASE_CURRENCY : $CurrencyObj->Code,
+        "To" => !$DirectionBool ? BASE_CURRENCY : $CurrencyObj->Code,
+        "FromValue" => (float) $ValueFlt,
+        "ToValue" => (float) $ConvertedValueFlt
     ];
+
+    $PaymentValueFlt = $DirectionBool ? $ValueFlt : $ConvertedValueFlt;
+    $SurchargePercentageFlt = $CurrencyModelClassStr::getSurchargePercentage();
+    if ($SurchargePercentageFlt) {
+        $ReturnArr["Surcharge"] = [
+            "Percentage" => $SurchargePercentageFlt * 100,
+            "Value" => round(($DirectionBool ? $ValueFlt : $ConvertedValueFlt) * $SurchargePercentageFlt, 2),
+        ];
+        $PaymentValueFlt *= (1 + $SurchargePercentageFlt);
+    }
+    $ReturnArr["PaymentValue"] = round($PaymentValueFlt, 2);
+
+    return $ReturnArr;
 }
