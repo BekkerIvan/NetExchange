@@ -101,27 +101,4 @@ class Currency extends Model {
         }
         return $this;
     }
-    public function load(Database $DatabaseObj, int $Id): ?self {
-        $CurrencyStdObj = $DatabaseObj->query(<<<SQL
-            SELECT *
-            FROM `{$this->getTableName()}`
-            WHERE Id = {$Id}
-        SQL, true);
-        if (empty($CurrencyStdObj)) {
-            return null;
-        }
-        return $this->construct($CurrencyStdObj);
-    }
-    public function loadAll(Database $DatabaseObj): array {
-        $CurrencyStdObjArr = $DatabaseObj->query(<<<SQL
-            SELECT *
-            FROM `{$this->getTableName()}`
-        SQL);
-        $CurrencyObjArr = [];
-        foreach ($CurrencyStdObjArr as $CurrencyStdObj) {
-            $CurrencyObj = new self();
-            $CurrencyObjArr[] = $CurrencyObj->construct($CurrencyStdObj);
-        }
-        return $CurrencyObjArr;
-    }
 }

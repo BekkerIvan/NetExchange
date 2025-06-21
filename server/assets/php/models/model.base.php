@@ -39,9 +39,30 @@ abstract class Model implements JsonSerializable {
     protected abstract function construct(stdClass $StdClassObj): self;
 
     protected int $IdInt;
-    public abstract function load(Database $DatabaseObj, int $Id): ?self;
-    public abstract function loadAll(Database $DatabaseObj): array;
     public abstract function Save(Database $DatabaseObj): self;
+    public function load(Database $DatabaseObj, int $Id): ?self {
+        $OrderStdObj = $DatabaseObj->query(<<<SQL
+            SELECT *
+            FROM `{$this->getTableName()}`
+            WHERE Id = {$Id}
+        SQL, true);
+        if (empty($OrderStdObj)) {
+            return null;
+        }
+        return $this->construct($OrderStdObj);
+    }
+    public function loadAll(Database $DatabaseObj): array {
+        $OrderStdObjArr = $DatabaseObj->query(<<<SQL
+            SELECT *
+            FROM `{$this->getTableName()}`
+        SQL);
+        $OrderObjArr = [];
+        foreach ($OrderStdObjArr as $OrderStdObj) {
+            $OrderObj = new static();
+            $OrderObjArr[] = $OrderObj->construct($OrderStdObj);
+        }
+        return $OrderObjArr;
+    }
 
     public static function getDataModel(): array {
         return self::$DataModelArr;

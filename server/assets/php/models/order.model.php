@@ -154,27 +154,4 @@ class Order extends Model {
         }
         return $this;
     }
-    public function load(Database $DatabaseObj, int $Id): ?self {
-        $OrderStdObj = $DatabaseObj->query(<<<SQL
-            SELECT *
-            FROM `{$this->getTableName()}`
-            WHERE Id = {$Id}
-        SQL, true);
-        if (empty($OrderStdObj)) {
-            return null;
-        }
-        return $this->construct($OrderStdObj);
-    }
-    public function loadAll(Database $DatabaseObj): array {
-        $OrderStdObjArr = $DatabaseObj->query(<<<SQL
-            SELECT *
-            FROM `{$this->getTableName()}`
-        SQL);
-        $OrderObjArr = [];
-        foreach ($OrderStdObjArr as $OrderStdObj) {
-            $OrderObj = new self();
-            $OrderObjArr[] = $OrderObj->construct($OrderStdObj);
-        }
-        return $OrderObjArr;
-    }
 }
