@@ -97,7 +97,7 @@
             </Alert>
         {/if}
     </div>
-    {#if calculatedSummary && !order}
+    {#if selectedCurrency && calculatedSummary && !order}
         <div class="w-1/2 md:w-1/3 lg:w-1/4">
             <SummaryView bind:placeOrder bind:placingOrder bind:summary={calculatedSummary}/>
         </div>
