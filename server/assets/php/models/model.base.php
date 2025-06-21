@@ -41,27 +41,27 @@ abstract class Model implements JsonSerializable {
     protected int $IdInt;
     public abstract function Save(Database $DatabaseObj): self;
     public function load(Database $DatabaseObj, int $Id): ?self {
-        $OrderStdObj = $DatabaseObj->query(<<<SQL
+        $EntityStdObj = $DatabaseObj->query(<<<SQL
             SELECT *
             FROM `{$this->getTableName()}`
             WHERE Id = {$Id}
         SQL, true);
-        if (empty($OrderStdObj)) {
+        if (empty($EntityStdObj)) {
             return null;
         }
-        return $this->construct($OrderStdObj);
+        return $this->construct($EntityStdObj);
     }
     public function loadAll(Database $DatabaseObj): array {
-        $OrderStdObjArr = $DatabaseObj->query(<<<SQL
+        $EntityStdObjArr = $DatabaseObj->query(<<<SQL
             SELECT *
             FROM `{$this->getTableName()}`
         SQL);
-        $OrderObjArr = [];
-        foreach ($OrderStdObjArr as $OrderStdObj) {
-            $OrderObj = new static();
-            $OrderObjArr[] = $OrderObj->construct($OrderStdObj);
+        $EntityObjArr = [];
+        foreach ($EntityStdObjArr as $EntityStdObj) {
+            $EntityObj = new static();
+            $EntityObjArr[] = $EntityObj->construct($EntityStdObj);
         }
-        return $OrderObjArr;
+        return $EntityObjArr;
     }
 
     public static function getDataModel(): array {

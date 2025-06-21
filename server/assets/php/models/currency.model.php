@@ -5,6 +5,7 @@ require_once "model.base.php";
 /**
  * @property-read int Id
  * @property-read ?DateTime CreatedDateTime
+ * @property-read string CurrencyClassPath
  * @property string Code
  * @property float ExchangeRate
  */
@@ -42,12 +43,16 @@ class Currency extends Model {
     protected float $ExchangeRateFlt;
     protected ?DateTime $CreatedDateTimeObj = null;
 
+    protected const string CURRENCY_ABSOLUTE_PATH = SERVER_ROOT."/assets/php/currencies";
+    protected string $CurrencyClassPathStr;
+
     public function __get(string $name) {
         return match ($name) {
             "Id" => $this->IdInt,
             "Code" => $this->CodeStr,
             "ExchangeRate" => $this->ExchangeRateFlt,
             "CreatedDateTime" => $this->CreatedDateTimeObj,
+            "CurrencyClassPath" => $this->CurrencyClassPathStr,
         };
     }
     public function __set(string $name, $value): void {
@@ -68,7 +73,7 @@ class Currency extends Model {
             "Id" => !empty($this->IdInt) ? $this->IdInt : -1,
             "Code" => $this->CodeStr,
             "ExchangeRate" => $this->ExchangeRateFlt,
-            "CreatedDateTime" => $this->CreatedDateTimeObj?->format(DATE_TIME_FORMAT),
+            "CreatedDateTime" => $this->CreatedDateTimeObj?->format(DATE_TIME_FORMAT)
         ];
     }
 
@@ -77,6 +82,7 @@ class Currency extends Model {
         $this->CodeStr = $StdClassObj->Code;
         $this->ExchangeRateFlt = $StdClassObj->ExchangeRate;
         $this->CreatedDateTimeObj = $StdClassObj->CreatedDateTime ? new DateTime($StdClassObj->CreatedDateTime) : null;
+        $this->CurrencyClassPathStr = self::CURRENCY_ABSOLUTE_PATH."/{$this->CodeStr}.currency.php";
         return $this;
     }
 
@@ -100,5 +106,35 @@ class Currency extends Model {
             SQL);
         }
         return $this;
+    }
+    public function loadByCode(Database $DatabaseObj, string $CodeStr): ?self {
+        $CurrencyStdObj = $DatabaseObj->query(<<<SQL
+            SELECT *
+            FROM `{$this->getTableName()}`
+            WHERE Code = '{$CodeStr}'
+        SQL, true);
+        if (empty($CurrencyStdObj)) {
+            return null;
+        }
+        return $this->construct($CurrencyStdObj);
+    }
+
+    public function createCurrencyFile(): bool {
+        $FilePathStr = self::CURRENCY_ABSOLUTE_PATH."/{$this->CodeStr}.currency.php";
+        if (file_exists($FilePathStr)) {
+            return true;
+        }
+        $CurrencyFileObj = fopen($FilePathStr, "x+");
+        if ($CurrencyFileObj === false) {
+            return true;
+        }
+        fwrite($CurrencyFileObj, <<<PHP
+<?php
+class {$this->CodeStr} {
+    const string CODE = '{$this->CodeStr}';
+}
+PHP);
+        fclose($CurrencyFileObj);
+        return true;
     }
 }

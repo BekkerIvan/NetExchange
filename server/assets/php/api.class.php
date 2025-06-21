@@ -12,6 +12,8 @@ class API {
     public function __construct(
         protected array $AllowedMethodsArr
     ) {
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Headers: Content-Type, Authorization");
         $PathInfoStr = $_SERVER["PATH_INFO"] ?? DIRECTORY_SEPARATOR;
         if (str_starts_with($PathInfoStr, DIRECTORY_SEPARATOR)) {
             $PathInfoStr = substr($PathInfoStr, 1);
