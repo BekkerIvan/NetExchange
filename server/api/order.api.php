@@ -63,6 +63,7 @@ function place(API $APIObj): Order {
     $OrderObj->BaseCurrencyAmount = !$DirectionBool ? $ConvertedValueFlt : $ValueFlt;
     $OrderObj->SurchargeAmount = $SurchargeAmountFlt;
     $OrderObj->SurchargePercentage = $CurrencyModelClassStr::getSurchargePercentage();
+    $OrderObj->FinalAmount = $OrderObj->calculateFinalAmount();
     if (!$CurrencyModelClassStr::doBeforeOrderPlaced($OrderObj)) {
         $APIObj->return("Order has been canceled.");
     }

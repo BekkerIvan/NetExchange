@@ -5,7 +5,7 @@ require_once "model.base.php";
  * @property-read int Id
  * @property-read DateTime OrderedDate
  * @property-read string Reference
- * @property-read float FinalAmount
+ * @property float FinalAmount
  * @property string ForeignCurrency
  * @property string BaseCurrency
  * @property float ForeignExchangeRate
@@ -13,6 +13,8 @@ require_once "model.base.php";
  * @property float BaseCurrencyAmount
  * @property float SurchargePercentage
  * @property float SurchargeAmount
+ * @property float DiscountPercentage
+ * @property float DiscountAmount
  */
 class Order extends Model {
     public function getTableName(): string {
@@ -30,6 +32,8 @@ class Order extends Model {
     const string SURCHARGE_PERCENTAGE = "SurchargePercentage";
     const string SURCHARGE_AMOUNT = "SurchargeAmount";
     const string FINAL_AMOUNT = "FinalAmount";
+    const string DISCOUNT_PERCENTAGE = "DiscountPercentage";
+    const string DISCOUNT_AMOUNT = "DiscountAmount";
 
     const int REFERENCE_LENGTH = 15;
 
@@ -46,6 +50,8 @@ class Order extends Model {
             self::SURCHARGE_PERCENTAGE => self::FLOAT,
             self::SURCHARGE_AMOUNT => self::FLOAT,
             self::FINAL_AMOUNT => self::FLOAT,
+            self::DISCOUNT_PERCENTAGE => self::FLOAT,
+            self::DISCOUNT_AMOUNT => self::FLOAT,
         ];
     }
     public function setTableConstraints(): void {
@@ -63,6 +69,8 @@ class Order extends Model {
             self::BASE_CURRENCY_AMOUNT => 0,
             self::SURCHARGE_AMOUNT => 0,
             self::FINAL_AMOUNT => 0,
+            self::DISCOUNT_PERCENTAGE => 0,
+            self::DISCOUNT_AMOUNT => 0,
         ];
     }
 
@@ -76,6 +84,8 @@ class Order extends Model {
     protected ?float $SurchargePercentageFlt = null;
     protected float $SurchargeAmountFlt = 0;
     protected ?float $FinalAmountFlt = null;
+    protected float $DiscountPercentageFlt = 0;
+    protected float $DiscountAmountFlt = 0;
 
     public function __get(string $name) {
         return match ($name) {
@@ -89,11 +99,16 @@ class Order extends Model {
             "SurchargePercentage" => $this->SurchargePercentageFlt,
             "SurchargeAmount" => $this->SurchargeAmountFlt,
             "OrderedDate" => $this->OrderedDateObj,
-            "FinalAmount" => $this->FinalAmountFlt
+            "FinalAmount" => $this->FinalAmountFlt,
+            "DiscountPercentage" => $this->DiscountPercentageFlt,
+            "DiscountAmount" => $this->DiscountAmountFlt,
         };
     }
     public function __set(string $name, $value): void {
         switch ($name) {
+            case "FinalAmount":
+                $this->FinalAmountFlt = (string) $value;
+            break;
             case "ForeignCurrency":
                 $this->ForeignCurrencyStr = (string) $value;
             break;
@@ -114,6 +129,12 @@ class Order extends Model {
             break;
             case "SurchargeAmount":
                 $this->SurchargeAmountFlt = (float) $value;
+            break;
+            case "DiscountPercentage":
+                $this->DiscountPercentageFlt = (float) $value;
+            break;
+            case "DiscountAmount":
+                $this->DiscountAmountFlt = (float) $value;
             break;
             case "OrderedDate":
                 if (!($value instanceof DateTime)) {
@@ -138,6 +159,8 @@ class Order extends Model {
             "SurchargePercentage" => $this->SurchargePercentageFlt,
             "SurchargeAmount" => $this->SurchargeAmountFlt,
             "FinalAmount" => $this->FinalAmountFlt,
+            "DiscountAmount" => $this->DiscountAmountFlt,
+            "DiscountPercentage" => $this->DiscountPercentageFlt,
             "OrderedDate" => $this->OrderedDateObj->format(DATE_TIME_FORMAT),
         ];
     }
@@ -153,6 +176,8 @@ class Order extends Model {
         $this->BaseCurrencyAmountFlt = $StdClassObj->BaseCurrencyAmount;
         $this->SurchargePercentageFlt = $StdClassObj->SurchargePercentage;
         $this->SurchargeAmountFlt = $StdClassObj->SurchargeAmount;
+        $this->DiscountPercentageFlt = $StdClassObj->DiscountPercentage;
+        $this->DiscountAmountFlt = $StdClassObj->DiscountAmount;
         $this->OrderedDateObj = $StdClassObj->OrderedDate ? new DateTime($StdClassObj->OrderedDate) : null;
         return $this;
     }
@@ -177,11 +202,10 @@ class Order extends Model {
         $CreateNewRecordBool = empty($this->IdInt);
         if ($CreateNewRecordBool) {
             $this->ReferenceStr = $this->generateReference($DatabaseObj);
-            $this->FinalAmountFlt = $this->calculateFinalAmount();
             $this->OrderedDateObj = new DateTime();
             $DatabaseObj->query(<<<SQL
-                INSERT INTO `{$this->getTableName()}` (FinalAmount, Reference, ForeignCurrency, ForeignExchangeRate, ForeignCurrencyAmount, BaseCurrency, BaseCurrencyAmount, SurchargePercentage, SurchargeAmount)
-                VALUES ({$this->FinalAmountFlt}, '{$this->ReferenceStr}', '{$this->ForeignCurrencyStr}', {$this->ForeignExchangeRateFlt}, {$this->ForeignCurrencyAmountFlt}, '{$this->BaseCurrencyStr}', {$this->BaseCurrencyAmountFlt}, {$this->SurchargePercentageFlt}, {$this->SurchargeAmountFlt})
+                INSERT INTO `{$this->getTableName()}` (DiscountPercentage, DiscountAmount, FinalAmount, Reference, ForeignCurrency, ForeignExchangeRate, ForeignCurrencyAmount, BaseCurrency, BaseCurrencyAmount, SurchargePercentage, SurchargeAmount)
+                VALUES ({$this->DiscountPercentageFlt}, {$this->DiscountAmountFlt}, {$this->FinalAmountFlt}, '{$this->ReferenceStr}', '{$this->ForeignCurrencyStr}', {$this->ForeignExchangeRateFlt}, {$this->ForeignCurrencyAmountFlt}, '{$this->BaseCurrencyStr}', {$this->BaseCurrencyAmountFlt}, {$this->SurchargePercentageFlt}, {$this->SurchargeAmountFlt})
             SQL);
             $CurrencyIdObj = $DatabaseObj->query(<<<SQL
                 SELECT LAST_INSERT_ID() AS Id
@@ -196,7 +220,9 @@ class Order extends Model {
                     BaseCurrency = '{$this->BaseCurrencyStr}',
                     BaseCurrencyAmount = '{$this->BaseCurrencyAmountFlt}',
                     SurchargePercentage = '{$this->SurchargePercentageFlt}',
-                    SurchargeAmount = '{$this->SurchargeAmountFlt}'
+                    SurchargeAmount = '{$this->SurchargeAmountFlt}',
+                    DiscountPercentage = '{$this->DiscountPercentageFlt}',
+                    DiscountAmount = '{$this->DiscountAmountFlt}'
                 WHERE Id = {$this->IdInt}
             SQL);
         }
