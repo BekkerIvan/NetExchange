@@ -1,20 +1,15 @@
-# Use Node.js as the base image
-FROM node:alpine
-
-# Set the working directory
+FROM node:alpine as npm
 WORKDIR /app
-
-# Copy package files and install dependencies
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json* ./
 RUN npm install
 
-# Copy the rest of the application files
+FROM node:alpine
+
+WORKDIR /app
+
+COPY --from=npm /app/node_modules /app/node_modules
 COPY . .
 
-# Build the Svelte application
-# RUN npm run build
-
-# Expose the port the app will run on
 EXPOSE 80
 
 # Start the application
